@@ -66,3 +66,29 @@ exports.addPost = (obj, callback) => {
         }
     })
 }
+//获得id对应的文章
+exports.getPostById = (id, callback) => {
+    let sql = `select p.*, u.nickname, c.name from posts p
+                join users u
+                join categories c
+                on p.user_id = u.id and p.category_id = c.id
+                where p.isDel = 0 and p.id =` + id;
+    conn.query(sql, (err, result) => {
+        if(err){
+            callback(err);
+        }else{
+            callback(null, result[0]);
+        }
+    })
+}
+//编辑文章
+exports.editPost = (obj, callback) => {
+    let sql = 'update posts set ? where id = ?';
+    conn.query(sql, [obj, obj.id], (err, result) => {
+        if(err){
+            callback(err);
+        }else{
+            callback(null);
+        }
+    })
+}

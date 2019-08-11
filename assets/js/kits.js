@@ -55,3 +55,14 @@ regxFun.prototype.start = function () {
         }
     }
 }
+
+//获得url？后的参数并用键值对存储
+function getUrlSearch(){
+    let href = location.search.substring(1).split('&');
+    let params = {};
+    href.forEach((e,i) => {
+        let arr = e.split('=');
+        params[arr[0]] = arr[1];
+    })
+    return params;
+}

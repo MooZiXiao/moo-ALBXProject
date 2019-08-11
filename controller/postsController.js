@@ -1,3 +1,4 @@
+const moment = require('moment');
 //引入
 const postsModel = require('../model/postsModel');
 //全部文章的显示
@@ -31,10 +32,32 @@ exports.addPost = (req, res) => {
     obj.likes = 0;
     postsModel.addPost(obj, (err) => {
         if (err) {
-            console.log(err)
             res.json({ code: 403, msg: '新增文章错误' })
         } else {
             res.json({ code: 200, msg: '新增文章成功' })
+        }
+    })
+}
+//获得id对应的文章
+exports.getPostById = (req, res) => {
+    let id = req.query.id;
+    postsModel.getPostById(id, (err, data) => {
+        if (err) {
+            res.json({ code: 403, msg: '文章获取失败'})
+        } else {
+            data.created = moment(data.created).format('YYYY-MM-DDTHH:mm')
+            res.json({ code: 200, msg: '文章获取成功', data})
+        }
+    })
+}
+//编辑文章
+exports.editPost = (req, res) => {
+    let obj = req.body;
+    postsModel.editPost(obj, (err) => {
+        if (err) {
+            res.json({ code: 403, msg: '编辑文章失败' })
+        } else {
+            res.json({ code: 200, msg: '编辑文章成功' })
         }
     })
 }

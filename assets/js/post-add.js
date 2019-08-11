@@ -59,8 +59,39 @@ $(function(){
     let title = document.getElementById('title');
     let content = document.getElementById('content');
     let slug = document.getElementById('slug');
-    //新增
-    $('.btnSave').on('click', function(){
+
+    if(location.href.indexOf('?') === -1){
+        //新增
+        $('.btnSave').on('click', function(){
+            opt('/addPost')
+        })
+    }else{
+        let id = getUrlSearch().id;
+        //显示
+        $.ajax({
+            url: '/getPostById?id=' + id,
+            success: function(res){
+                if(res.code === 200){
+                    $('#title').val(res.data.title);
+                    $('#content').val(res.data.content);
+                    $('#slug').val(res.data.slug);
+                    $('.thumbnail').attr('src', '../uploads/' + res.data.feature).show();
+                    $('#category').val(res.data.category_id);
+                    $('#created').val(res.data.created);
+                    $('#status').val(res.data.status);
+                    //隐藏域
+                    $('#id').val(res.data.id);
+                    $('#hiddenImg').val(res.data.feature);
+                }
+            }
+        })
+        //编辑
+        $('.btnSave').on('click', function(){
+            opt('/editPost')
+        })
+    }
+
+    function opt(url){
         //富文本框处理
         CKEDITOR.instances.content.updateElement();
         //交互判断
@@ -91,7 +122,7 @@ $(function(){
         }else{
             $.ajax({
                 type: 'post',
-                url: '/addPost',
+                url: url,
                 data: $('form').serialize(),
                 success: function(res){
                     if(res.code === 200){
@@ -103,5 +134,5 @@ $(function(){
                 }
             })
         }
-    })
+    }
 })

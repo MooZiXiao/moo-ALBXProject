@@ -255,38 +255,38 @@ getRouterName(href) {
 
     ```js
     //分页
-        function setPage(count){
-            $('.pagination').bootstrapPaginator({
-                bootstrapMajorVersion: 3,
-                currentPage: pageNum,
-                totalPages: count,
-                onPageClicked: function (event,originalEvent,type,page) {
-                    pageNum = page;
-                    init();
-                }
-            })
-        }
+    function setPage(count){
+        $('.pagination').bootstrapPaginator({
+            bootstrapMajorVersion: 3,
+            currentPage: pageNum,
+            totalPages: count,
+            onPageClicked: function (event,originalEvent,type,page) {
+                pageNum = page;
+                init();
+            }
+        })
+    }
     ```
 
   - 分类 （由于在筛选的条件中需要加载分类的数据，则需要在后台设置好分类的路由，控制器及数据层，此处略）
 
     ```js
     //分类
-        $.ajax({
-            url: '/getAllCategories',
-            success: function(res){
-                if(res.code === 200){
-                    let html = '<option value="all">所有分类</option>';
-                    for(let i = 0; i < res.data.length; i++){
-                        html += `<option value="${res.data[i].id}">${res.data[i].name}</option>`;
-                    }
-                    $('.showCate').html(html);
+    $.ajax({
+        url: '/getAllCategories',
+        success: function(res){
+            if(res.code === 200){
+                let html = '<option value="all">所有分类</option>';
+                for(let i = 0; i < res.data.length; i++){
+                    html += `<option value="${res.data[i].id}">${res.data[i].name}</option>`;
                 }
+                $('.showCate').html(html);
             }
-        })
+        }
+    })
     ```
 
-### 8.文章的新增
+### 8.文章的新增含图片上传
 
 - 图片上传
 
@@ -323,12 +323,313 @@ getRouterName(href) {
 
   - 前台
 
+    ```js
+     //上传
+    $('#feature').on('change', function(){
+        let file = this.files[0];
+        let fd = new FormData();
+        fd.append('img', file);
+        $.ajax({
+            type: 'post',
+            url: '/uploadFile',
+            data: fd,
+            contentType: false,
+            processData: false,
+            success: function(res) {
+                if(res.code === 200){
+                    $('.thumbnail').attr('src', '/uploads/' + res.img).show();
+                }else{
+                    $('.alert-danger span').text(res.msg);
+                    $('.alert-danger').fadeIn(500).delay(2000).fadeOut(500);
+                }
+            }
+        })
+    })
+    ```
+
+    
+
 - 后台
 
-  router
+  router 
+
+  ```js
+  .post('/addPost', postsController.addPost)
+  ```
 
   postsController
 
+  ```js
+  //新增文章
+  exports.addPost = (req, res) => {
+      let obj = req.body;
+      obj.id = null;
+      obj.user_id = req.session.currentUser.id;
+      obj.views = 0;
+      obj.likes = 0;
+      postsModel.addPost(obj, (err) => {
+          if (err) {
+              console.log(err)
+              res.json({ code: 403, msg: '新增文章错误' })
+          } else {
+              res.json({ code: 200, msg: '新增文章成功' })
+          }
+      })
+  }
+  ```
+
   postsModel
 
+  ```js
+  //新增文章
+  exports.addPost = (obj, callback) => {
+      let sql = 'insert into posts set ?';
+      conn.query(sql, obj, (err, result) => {
+          if(err){
+              callback(err);
+          }else{
+              callback(null);
+          }
+      })
+  }
+  ```
+
+  
+
 - 前台
+
+  交互判断及发送ajax请求
+
+  ```js
+  //新增
+  $('.btnSave').on('click', function(){
+      //富文本框处理
+      CKEDITOR.instances.content.updateElement();
+      //交互判断
+      let regx = new regxFun();
+      regx.add(title, [
+          {
+              funName: 'isEmpty',
+              msg: '标题不能为空'
+          }
+      ])
+      regx.add(content, [
+          {
+              funName: 'isEmpty',
+              msg: '内容不能为空'
+          }
+      ])
+      regx.add(slug, [
+          {
+              funName: 'isEmpty',
+              msg: '别名不能为空'
+          }
+      ])
+      let errMsg = regx.start();
+  
+      if(errMsg){
+          $('.alert-danger span').text(errMsg);
+          $('.alert-danger').fadeIn(500).delay(2000).fadeOut(500);
+      }else{
+          $.ajax({
+              type: 'post',
+              url: '/addPost',
+              data: $('form').serialize(),
+              success: function(res){
+                  if(res.code === 200){
+                      location.href = '/admin/posts'
+                  }else{
+                      $('.alert-danger span').text(res.msg);
+                      $('.alert-danger').fadeIn(500).delay(2000).fadeOut(500);
+                  }
+              }
+          })
+      }
+  })
+  ```
+
+  
+
+### 9.文章编辑
+
+- 显示
+
+  - 后台
+
+    router（.get('/getPostById', postsController.getPostById)）
+
+    postsController
+
+    ```js
+    //获得id对应的文章
+    exports.getPostById = (req, res) => {
+        let id = req.query.id;
+        postsModel.getPostById(id, (err, data) => {
+            if (err) {
+                res.json({ code: 403, msg: '文章获取失败'})
+            } else {
+                data.created = moment(data.created).format('YYYY-MM-DDTHH:mm')
+                res.json({ code: 200, msg: '文章获取成功', data})
+            }
+        })
+    }
+    ```
+
+    postsModel
+
+    ```js
+    //获得id对应的文章
+    exports.getPostById = (id, callback) => {
+        let sql = `select p.*, u.nickname, c.name from posts p
+                    join users u
+                    join categories c
+                    on p.user_id = u.id and p.category_id = c.id
+                    where p.isDel = 0 and p.id =` + id;
+        conn.query(sql, (err, result) => {
+            if(err){
+                callback(err);
+            }else{
+                callback(null, result[0]);
+            }
+        })
+    }
+    ```
+
+    
+
+  - 前台
+
+    获得url?后的Id并显示对应数据
+
+    ```js
+    let id = getUrlSearch().id;
+    //显示
+    $.ajax({
+        url: '/getPostById?id=' + id,
+        success: function(res){
+            if(res.code === 200){
+                $('#title').val(res.data.title);
+                $('#content').val(res.data.content);
+                $('#slug').val(res.data.slug);
+                $('.thumbnail').attr('src', '../uploads/' + res.data.feature).show();
+                $('#category').val(res.data.category_id);
+                $('#created').val(res.data.created);
+                $('#status').val(res.data.status);
+                //隐藏域
+                $('#id').val(res.data.id);
+                $('#hiddenImg').val(res.data.feature);
+            }
+        }
+    })
+    ```
+
+    
+
+- 编辑
+
+  - 后台
+
+    router（.post('/editPost', postsController.editPost)）
+
+    postsController
+
+    ```js
+    //编辑文章
+    exports.editPost = (req, res) => {
+        let obj = req.body;
+        postsModel.editPost(obj, (err) => {
+            if (err) {
+                res.json({ code: 403, msg: '编辑文章失败' })
+            } else {
+                res.json({ code: 200, msg: '编辑文章成功' })
+            }
+        })
+    }
+    ```
+
+    postsModel
+
+    ```js
+    //编辑文章
+    exports.editPost = (obj, callback) => {
+        let sql = 'update posts set ? where id = ?';
+        conn.query(sql, [obj, obj.id], (err, result) => {
+            if(err){
+                callback(err);
+            }else{
+                callback(null);
+            }
+        })
+    }
+    ```
+
+  - 前台
+
+    ```js
+    if(location.href.indexOf('?') === -1){
+        //新增
+        $('.btnSave').on('click', function(){
+            opt('/addPost')
+        })
+    }else{
+        let id = getUrlSearch().id;
+        //显示
+        代码如上的显示的前台代码
+        //编辑
+        $('.btnSave').on('click', function(){
+            opt('/editPost')
+        })
+    }
+    ```
+
+  - 由于添加与编辑发送的ajax请求大致一样，故将之封装
+
+    ```js
+    function opt(url){
+        //富文本框处理
+        CKEDITOR.instances.content.updateElement();
+        //交互判断
+        let regx = new regxFun();
+        regx.add(title, [
+            {
+                funName: 'isEmpty',
+                msg: '标题不能为空'
+            }
+        ])
+        regx.add(content, [
+            {
+                funName: 'isEmpty',
+                msg: '内容不能为空'
+            }
+        ])
+        regx.add(slug, [
+            {
+                funName: 'isEmpty',
+                msg: '别名不能为空'
+            }
+        ])
+        let errMsg = regx.start();
+    
+        if(errMsg){
+            $('.alert-danger span').text(errMsg);
+            $('.alert-danger').fadeIn(500).delay(2000).fadeOut(500);
+        }else{
+            $.ajax({
+                type: 'post',
+                url: url,
+                data: $('form').serialize(),
+                success: function(res){
+                    if(res.code === 200){
+                        location.href = '/admin/posts'
+                    }else{
+                        $('.alert-danger span').text(res.msg);
+                        $('.alert-danger').fadeIn(500).delay(2000).fadeOut(500);
+                    }
+                }
+            })
+        }
+    }
+    ```
+
+    
+

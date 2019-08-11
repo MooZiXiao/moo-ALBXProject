@@ -31,6 +31,8 @@ router.get('/', pagesController.getIndexPage)
     .get('/getAllPosts', postsController.getAllPosts)
     .post('/addPost', postsController.addPost)
     .get('/checkSlugInPost', postsController.checkSlugInPost)
+    .get('/getPostById', postsController.getPostById)
+    .post('/editPost', postsController.editPost)
 
     .get('/getAllCategories', cateController.getAllCategories)
 
