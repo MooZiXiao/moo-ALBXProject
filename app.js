@@ -14,5 +14,9 @@ app.listen(8080, '127.0.0.1', () => {
 app.use('/assets', express.static('assets'));
 app.use('/uploads', express.static('uploads'));
 
+//默认模板
+app.set('view engine', 'ejs');
+app.set('views', __dirname + '/views');
+
 //路由
 app.use(router);
