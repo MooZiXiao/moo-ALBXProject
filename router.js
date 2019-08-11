@@ -33,6 +33,7 @@ router.get('/', pagesController.getIndexPage)
     .get('/checkSlugInPost', postsController.checkSlugInPost)
     .get('/getPostById', postsController.getPostById)
     .post('/editPost', postsController.editPost)
+    .get('/delPostById', postsController.delPostById)
 
     .get('/getAllCategories', cateController.getAllCategories)
 

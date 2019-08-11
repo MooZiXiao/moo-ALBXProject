@@ -62,4 +62,22 @@ $(function(){
 
         init(params);
     })
+
+    //删除
+    $('tbody').on('click', '.btnDel', function(){
+        let id = $(this).data('id');
+        if(confirm('确定要删除吗？')){
+            $.ajax({
+                url: '/delPostById?id=' + id,
+                success: function(res){
+                    if(res.code === 200){
+                        init();
+                    }else{
+                        $('.alert-danger span').text(res.msg);
+                        $('.alert-danger').fadeIn(500).delay(2000).fadeOut(500);
+                    }
+                }
+            })
+        }
+    })
 })

@@ -631,5 +631,64 @@ getRouterName(href) {
     }
     ```
 
-    
+### 10.文章的删除
 
+- 后台
+
+  router（.get('/delPostById', postsController.delPostById)）
+
+  postsController
+
+  ```js
+  //根据id删除文章
+  exports.delPostById = (req, res) => {
+      let id = req.query.id;
+      postsModel.delPostById(id, (err) => {
+          if (err) {
+              res.json({ code: 403, msg: '删除文章失败' })
+          } else {
+              res.json({ code: 200, msg: '删除文章成功' })
+          }
+      })
+  }
+  ```
+
+  postsModel
+
+  ```js
+  exports.delPostById = (id, callback) => {
+      let sql = 'update posts set isDel=1 where id = ' + id;
+      conn.query(sql, (err, result) => {
+          if(err){
+              callback(err);
+          }else{
+              callback(null);
+          }
+      })
+  }
+  ```
+
+- 前台
+
+  获得id并用委托注册事件
+
+  ```js
+  $('tbody').on('click', '.btnDel', function(){
+          let id = $(this).data('id');
+          if(confirm('确定要删除吗？')){
+              $.ajax({
+                  url: '/delPostById?id=' + id,
+                  success: function(res){
+                      if(res.code === 200){
+                          init();
+                      }else{
+                          $('.alert-danger span').text(res.msg);
+                          $('.alert-danger').fadeIn(500).delay(2000).fadeOut(500);
+                      }
+                  }
+              })
+          }
+      })
+  ```
+
+  

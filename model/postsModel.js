@@ -92,3 +92,14 @@ exports.editPost = (obj, callback) => {
         }
     })
 }
+//删除文章
+exports.delPostById = (id, callback) => {
+    let sql = 'update posts set isDel=1 where id = ' + id;
+    conn.query(sql, (err, result) => {
+        if(err){
+            callback(err);
+        }else{
+            callback(null);
+        }
+    })
+}
