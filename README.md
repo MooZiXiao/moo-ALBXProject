@@ -189,3 +189,100 @@ getRouterName(href) {
     ```
 
 - 前台
+  - ajax 显示全部文章
+
+### 7.文章的分页及筛选
+
+- 后台
+
+  - router
+
+  - postsController
+
+  - postsModel
+
+    ```js
+    //获得全部文章
+    exports.getAllPosts = (obj, callback) => {
+        let sql = `select p.*, u.nickname, c.name from posts p
+                    join users u
+                    join categories c
+                    on p.user_id = u.id and p.category_id = c.id
+                    where p.isDel = 0 `;
+        //筛选
+        if(obj.cate && obj.cate!== 'all'){
+            sql += ` and p.category_id = ${obj.cate} `;
+        }
+        if(obj.status && obj.status !== 'all'){
+            sql += ` and p.status = '${obj.status}' `;
+        }
+        sql += ` order by p.id desc
+                limit ${(obj.pageNum-1) * obj.pageSize}, ${obj.pageSize}`;
+        conn.query(sql, (err, result) => {
+            if (err) {
+                callback(err);
+            } else {
+            	//总数
+                sql = `select count(*) cnt from posts p
+                        join users u
+                        join categories c
+                        on p.user_id = u.id and p.category_id = c.id
+                        where p.isDel = 0 `;
+                if(obj.cate && obj.cate !== 'all'){
+                    sql += ` and p.category_id = ${obj.cate} `;
+                }
+                if(obj.status && obj.status !== 'all'){
+                    sql += ` and p.status = '${obj.status}' `;
+                }
+                conn.query(sql, (err2, res2) => {
+                    if(err2){
+                        callback(err2);
+                    }else{
+                        callback(null, {data: result, total: res2[0].cnt});
+                    }
+                })
+            }
+        })
+    ```
+
+    
+
+- 前台
+
+  - ajax
+
+  - bootsrap分页插件
+
+    ```js
+    //分页
+        function setPage(count){
+            $('.pagination').bootstrapPaginator({
+                bootstrapMajorVersion: 3,
+                currentPage: pageNum,
+                totalPages: count,
+                onPageClicked: function (event,originalEvent,type,page) {
+                    pageNum = page;
+                    init();
+                }
+            })
+        }
+    ```
+
+  - 分类 （由于在筛选的条件中需要加载分类的数据，则需要在后台设置好分类的路由，控制器及数据层，此处略）
+
+    ```js
+    //分类
+        $.ajax({
+            url: '/getAllCategories',
+            success: function(res){
+                if(res.code === 200){
+                    let html = '<option value="all">所有分类</option>';
+                    for(let i = 0; i < res.data.length; i++){
+                        html += `<option value="${res.data[i].id}">${res.data[i].name}</option>`;
+                    }
+                    $('.showCate').html(html);
+                }
+            }
+        })
+    ```
+

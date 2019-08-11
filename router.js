@@ -3,6 +3,7 @@ const express = require('express');
 const pagesController = require('./controller/pagesController');
 const userController = require('./controller/userController');
 const postsController = require('./controller/postsController');
+const cateController = require('./controller/cateController');
 //路由
 const router = express.Router();
 
@@ -27,6 +28,9 @@ router.get('/', pagesController.getIndexPage)
     .post('/login', userController.login)
 
     .get('/getAllPosts', postsController.getAllPosts)
+
+
+    .get('/getAllCategories', cateController.getAllCategories)
 
 
 //暴露
