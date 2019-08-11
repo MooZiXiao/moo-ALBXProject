@@ -40,3 +40,29 @@ exports.getAllPosts = (obj, callback) => {
         }
     })
 }
+//别名
+exports.checkSlugInPost = (slug, callback) => {
+    let sql = `select p.*, u.nickname, c.name from posts p
+                join users u
+                join categories c
+                on p.user_id = u.id and p.category_id = c.id
+                where p.isDel = 0 and p.slug =` + slug;
+    conn.query(sql, (err, result) => {
+        if(err){
+            callback(err);
+        }else{
+            callback(null)
+        }
+    })
+}
+//新增文章
+exports.addPost = (obj, callback) => {
+    let sql = 'insert into posts set ?';
+    conn.query(sql, obj, (err, result) => {
+        if(err){
+            callback(err);
+        }else{
+            callback(null);
+        }
+    })
+}
