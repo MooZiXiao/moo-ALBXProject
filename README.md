@@ -110,3 +110,37 @@
 
   - 交互判断 （状态模式）
   - 发送ajax请求
+
+### 5.admin-aside正确导航
+
+- 获得当前路由名称
+
+```js
+getRouterName(href) {
+        let routerName = '';
+        if (href.indexOf('?') === -1) {
+            routerName = href.substring(href.lastIndexOf('/') + 1);
+        } else {
+            routerName = href.substring(href.lastIndexOf('/') + 1, href.indexOf('?'));
+        }
+        return routerName;
+    }
+```
+
+- aside.js
+
+  ```js
+  let routerName = kits.getRouterName(location.href);
+  if(routerName === 'posts' || routerName === 'post-add' || routerName === 'categories'){
+      $('#menu-posts').addClass('in').attr('aria-expanded', true);
+      $('#menu-posts').siblings('a').removeClass('collapsed');
+  }
+  if(routerName === 'nav-menus' || routerName === 'slides' || routerName === 'settings'){
+  	$('#menu-settings').addClass('in').attr('aria-expanded', true);
+  	$('#menu-settings').siblings('a').removeClass('collapsed');
+  }
+  $('li').removeClass('active');
+  $('#' + routerName).addClass('active');
+  ```
+
+  
