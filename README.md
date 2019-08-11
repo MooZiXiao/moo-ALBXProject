@@ -143,4 +143,49 @@ getRouterName(href) {
   $('#' + routerName).addClass('active');
   ```
 
-  
+### 6.文章的显示
+
+- 后台
+
+  - router
+
+    ```js
+    .get('/getAllPosts', postsController.getAllPosts)
+    ```
+
+  - postsController
+
+    ```js
+    //全部文章的显示
+    exports.getAllPosts = (req, res) => {
+        postsModel.getAllPosts((err, data) => {
+            if(err){
+                res.json({code: 400, msg: '获取文章错误'})
+            }else{
+                res.json({code: 200, msg: '获取文章成功', data: data})
+            }
+        })
+    }
+    ```
+
+  - postsModel
+
+    ```js
+    //获得全部文章
+    exports.getAllPosts = (callback) => {
+        let sql = `select p.*, u.nickname, c.name from posts p
+                    join users u
+                    join categories c
+                    on p.user_id = u.id and p.category_id = c.id
+                    where p.isDel = 0 `;
+        conn.query(sql, (err, result) => {
+            if (err) {
+                callback(err);
+            } else {
+                callback(null, result);
+            }
+        })
+    }
+    ```
+
+- 前台

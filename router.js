@@ -2,6 +2,7 @@ const express = require('express');
 //引入控制器
 const pagesController = require('./controller/pagesController');
 const userController = require('./controller/userController');
+const postsController = require('./controller/postsController');
 //路由
 const router = express.Router();
 
@@ -24,6 +25,9 @@ router.get('/', pagesController.getIndexPage)
     .get('/admin/users', pagesController.getAdminUsersPage)
     //业务逻辑
     .post('/login', userController.login)
+
+    .get('/getAllPosts', postsController.getAllPosts)
+
 
 //暴露
 module.exports = router;
