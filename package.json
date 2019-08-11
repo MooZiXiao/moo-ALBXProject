@@ -1,0 +1,23 @@
+{
+  "name": "ALBX",
+  "version": "1.0.0",
+  "description": "",
+  "main": "app.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/MooZiXiao/moo-ALBXProject.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/MooZiXiao/moo-ALBXProject/issues"
+  },
+  "homepage": "https://github.com/MooZiXiao/moo-ALBXProject#readme",
+  "dependencies": {
+    "express": "^4.17.1"
+  }
+}
