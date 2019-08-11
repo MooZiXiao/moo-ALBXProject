@@ -43,12 +43,9 @@ $(function(){
     $('#slug').on('blur', function(){
         $.ajax({
             url: '/checkSlugInPost',
-            data: $('#slug').val(),
+            data: {slug: $('#slug').val()},
             success: function(res){
-                if(res.code === 200){
-                    $('.alert-danger span').text(res.msg);
-                    $('.alert-danger').fadeIn(500).delay(2000).fadeOut(500);
-                }else{
+                if(res.code === 403){
                     $('.alert-danger span').text(res.msg);
                     $('.alert-danger').fadeIn(500).delay(2000).fadeOut(500);
                 }
@@ -67,6 +64,7 @@ $(function(){
         })
     }else{
         let id = getUrlSearch().id;
+        $('.page-title h1').text('编辑文章');
         //显示
         $.ajax({
             url: '/getPostById?id=' + id,

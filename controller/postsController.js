@@ -14,12 +14,16 @@ exports.getAllPosts = (req, res) => {
 }
 //查询别名
 exports.checkSlugInPost = (req, res) => {
-    let obj = req.query;
-    postsModel.checkSlugInPost(obj, (err) => {
+    let obj = req.query.slug;
+    postsModel.checkSlugInPost(obj, (err, result) => {
         if (err) {
-            res.json({ code: 403, msg: '别名已经存在' })
+            res.json({ code: 403, msg: '服务器错误' })
         } else {
-            res.json({ code: 200, msg: '别名可以使用' })
+            if(result){
+                res.json({ code: 403, msg: '别名已经存在' })
+            }else{
+                res.json({ code: 200, msg: '别名可以使用' })
+            }
         }
     })
 }
@@ -64,6 +68,7 @@ exports.editPost = (req, res) => {
 //根据id删除文章
 exports.delPostById = (req, res) => {
     let id = req.query.id;
+    console.log(id)
     postsModel.delPostById(id, (err) => {
         if (err) {
             res.json({ code: 403, msg: '删除文章失败' })

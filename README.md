@@ -674,21 +674,91 @@ getRouterName(href) {
 
   ```js
   $('tbody').on('click', '.btnDel', function(){
-          let id = $(this).data('id');
-          if(confirm('确定要删除吗？')){
-              $.ajax({
-                  url: '/delPostById?id=' + id,
-                  success: function(res){
-                      if(res.code === 200){
-                          init();
-                      }else{
-                          $('.alert-danger span').text(res.msg);
-                          $('.alert-danger').fadeIn(500).delay(2000).fadeOut(500);
-                      }
+      let id = $(this).data('id');
+      if(confirm('确定要删除吗？')){
+          $.ajax({
+              url: '/delPostById?id=' + id,
+              success: function(res){
+                  if(res.code === 200){
+                      init();
+                  }else{
+                      $('.alert-danger span').text(res.msg);
+                      $('.alert-danger').fadeIn(500).delay(2000).fadeOut(500);
                   }
-              })
-          }
-      })
+              }
+          })
+      }
+  })
   ```
 
-  
+### 11.文章批量删除
+
+- 后台
+
+  - postsModel
+
+    ```js
+    let sql = `update posts set isDel=1 where id in (${id})`;
+    ```
+
+- 前台
+
+  - 全选、全不选
+
+    ```js
+    //全选、全不选
+    $('.ckAll').on('change', function(){
+        let statu = $(this).prop('checked');
+        $('tbody').find('.ck').prop('checked', statu);
+        if($('tbody').find('.ck:checked').length > 1){
+            $('.btnSome').show(500);
+        }else{
+            $('.btnSome').hide(500);
+        }
+    })
+    ```
+
+  - 单选
+
+    ```js
+    //单选
+    $('tbody').on('change', '.ck', function(){
+        let count = $('tbody').find('.ck:checked').length;
+        $('.ckAll').prop('checked', count === $('tbody').find('.ck').length);
+        if(count > 1){
+            $('.btnSome').show(500);
+        }else{
+            $('.btnSome').hide(500);
+        }
+    })
+    ```
+
+  - 批量删除
+
+    ```js
+    $('.btnSome').on('click', function(){
+        //获得选中的id
+        let isChecked = $('tbody').find('.ck:checked');
+        let arr = [];
+        for(let i = 0; i < isChecked.length; i++){
+            arr.push($(isChecked[i]).data('id'));
+        }
+        if(confirm('确定要删除吗？')){
+            $.ajax({
+                url: '/delPostById',
+                data: {id: arr.join(',')},
+                success: function(res){
+                    if(res.code === 200){
+                        $('.btnSome').hide();
+                        init();
+                    }else{
+                        $('.alert-danger span').text(res.msg);
+                        $('.alert-danger').fadeIn(500).delay(2000).fadeOut(500);
+                    }
+                }
+            })
+        }
+    })
+    ```
+
+    

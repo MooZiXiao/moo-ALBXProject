@@ -42,16 +42,12 @@ exports.getAllPosts = (obj, callback) => {
 }
 //别名
 exports.checkSlugInPost = (slug, callback) => {
-    let sql = `select p.*, u.nickname, c.name from posts p
-                join users u
-                join categories c
-                on p.user_id = u.id and p.category_id = c.id
-                where p.isDel = 0 and p.slug =` + slug;
+    let sql = `select * from posts where slug = '${slug}'`;
     conn.query(sql, (err, result) => {
         if(err){
             callback(err);
         }else{
-            callback(null)
+            callback(null, result[0])
         }
     })
 }
@@ -94,7 +90,7 @@ exports.editPost = (obj, callback) => {
 }
 //删除文章
 exports.delPostById = (id, callback) => {
-    let sql = 'update posts set isDel=1 where id = ' + id;
+    let sql = `update posts set isDel=1 where id in (${id})`;
     conn.query(sql, (err, result) => {
         if(err){
             callback(err);
