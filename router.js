@@ -36,6 +36,9 @@ router.get('/', pagesController.getIndexPage)
     .get('/delPostById', postsController.delPostById)
 
     .get('/getAllCategories', cateController.getAllCategories)
+    .post('/addCate', cateController.addCate)
+    .post('/editCateById', cateController.editCateById)
+    .get('/delCateById', cateController.delCateById)
 
     .post('/uploadFile', uploadController.uploadFile)
 //暴露

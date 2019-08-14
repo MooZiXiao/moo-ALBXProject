@@ -800,3 +800,15 @@ getRouterName(href) {
   ```
 
   
+
+### 13.分类的显示、添加、编辑、删除、批量删除
+
+- 编辑
+
+  ```html
+  //模板的编辑按钮
+  <a href="javascript:;" class="btn btn-info btn-xs btnEdit" data-id='{{ val.id }}' data-name='{{ val.name }}' data-slug='{{ val.slug }}'>编辑</a>
+  ```
+
+- 由于分类的显示、添加、编辑、删除、批量删除与文章的显示、添加、编辑、删除、批量删除大致一样，故可仿照上面文章的思想编写。
+
