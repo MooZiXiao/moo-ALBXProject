@@ -68,7 +68,6 @@ exports.editPost = (req, res) => {
 //根据id删除文章
 exports.delPostById = (req, res) => {
     let id = req.query.id;
-    console.log(id)
     postsModel.delPostById(id, (err) => {
         if (err) {
             res.json({ code: 403, msg: '删除文章失败' })

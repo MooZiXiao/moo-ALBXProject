@@ -189,6 +189,7 @@ getRouterName(href) {
     ```
 
 - 前台
+  
   - ajax 显示全部文章
 
 ### 7.文章的分页及筛选
@@ -761,4 +762,41 @@ getRouterName(href) {
     })
     ```
 
-    
+
+###12.加载提示及单条删除的正确显示
+
+- post.js
+
+  init函数中，当数据没有数据或是筛选中没有数据是给出提示
+
+  ```js
+  if(res.code === 200){
+      let html = template('postsTemp', res.data);
+      $('tbody').html(html);
+      if($('tbody').find('tr').length === 0){
+          $('.container-fluid').find('h3').remove();
+          $('.pagination').hide();
+          $('.container-fluid').append('<h3 style="text-align:center">抱歉，并没有数据噢...</h3>');
+      }else{
+          $('.pagination').show();
+          $('.container-fluid').find('h3').remove();
+          setPage(Math.ceil(res.data.total / pageSize));
+      }
+  }
+  ```
+
+  单条删除
+
+  ```js
+  基本事实：删除和刷新是两个操作
+  1.如果当前页只有一条记录，那么删除之后就应该加载 上一页的数据
+  2.如果当前页有多条记录，那么就直接重新加载这一页
+  3.如果是第一页，只有一条记录，那么就给出提示
+  if($('tbody>tr').length == 1){
+      if(pageNum > 1){
+          pageNum --
+      }
+  }
+  ```
+
+  

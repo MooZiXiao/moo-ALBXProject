@@ -14,12 +14,12 @@ $(function(){
                 if(res.code === 200){
                     let html = template('postsTemp', res.data);
                     $('tbody').html(html);
-                    console.log(res.data.total)
-                    console.log($('tbody').find('tr').length)
                     if($('tbody').find('tr').length === 0){
-                        setPage(1);
-                        $('.container-fluid').append('<h3 style="text-align:center">抱歉，找不出你要筛选的数据噢...</h3>')
+                        $('.container-fluid').find('h3').remove();
+                        $('.pagination').hide();
+                        $('.container-fluid').append('<h3 style="text-align:center">抱歉，并没有数据噢...</h3>');
                     }else{
+                        $('.pagination').show();
                         $('.container-fluid').find('h3').remove();
                         setPage(Math.ceil(res.data.total / pageSize));
                     }
@@ -71,6 +71,11 @@ $(function(){
                 url: '/delPostById?id=' + id,
                 success: function(res){
                     if(res.code === 200){
+                        if($('tbody tr').length === 1){
+                            if(pageNum > 1){
+                                pageNum --;
+                            }
+                        }
                         init();
                     }else{
                         $('.alert-danger span').text(res.msg);
@@ -86,9 +91,9 @@ $(function(){
         let statu = $(this).prop('checked');
         $('tbody').find('.ck').prop('checked', statu);
         if($('tbody').find('.ck:checked').length > 1){
-            $('.btnSome').show(500);
+            $('.btnSome').fadeIn(500);
         }else{
-            $('.btnSome').hide(500);
+            $('.btnSome').fadeOut(500);
         }
     })
     //单选
@@ -96,9 +101,9 @@ $(function(){
         let count = $('tbody').find('.ck:checked').length;
         $('.ckAll').prop('checked', count === $('tbody').find('.ck').length);
         if(count > 1){
-            $('.btnSome').show(500);
+            $('.btnSome').fadeIn(500);
         }else{
-            $('.btnSome').hide(500);
+            $('.btnSome').fadeOut(500);
         }
     })
     //批量删除
@@ -115,7 +120,7 @@ $(function(){
                 data: {id: arr.join(',')},
                 success: function(res){
                     if(res.code === 200){
-                        $('.btnSome').hide();
+                        $('.btnSome').fadeOut(500);
                         init();
                     }else{
                         $('.alert-danger span').text(res.msg);
