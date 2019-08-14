@@ -4,6 +4,7 @@ const pagesController = require('./controller/pagesController');
 const userController = require('./controller/userController');
 const postsController = require('./controller/postsController');
 const cateController = require('./controller/cateController');
+const optionsController = require('./controller/optionsController');
 const uploadController = require('./controller/uploadController');
 //路由
 const router = express.Router();
@@ -39,6 +40,9 @@ router.get('/', pagesController.getIndexPage)
     .post('/addCate', cateController.addCate)
     .post('/editCateById', cateController.editCateById)
     .get('/delCateById', cateController.delCateById)
+
+    .get('/getNavMenus', optionsController.getNavMenus)
+    .post('/addNavMenus', optionsController.addNavMenus)
 
     .post('/uploadFile', uploadController.uploadFile)
 //暴露

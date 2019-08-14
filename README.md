@@ -812,3 +812,64 @@ getRouterName(href) {
 
 - 由于分类的显示、添加、编辑、删除、批量删除与文章的显示、添加、编辑、删除、批量删除大致一样，故可仿照上面文章的思想编写。
 
+### 14.网站导航菜单
+
+####   新增
+
+- 后台
+
+  router
+
+  ```js
+  .post('/addNavMenus', optionsController.addNavMenus)
+  ```
+
+  potionsController
+
+  ```js
+  exports.addNavMenus = (req, res) => {
+      let obj = req.body;
+      obj.icon = 'fa fa-glass';
+      console.log(obj)
+      optionsModel.addNavMenus(obj, (err) => {
+          if (err) {
+              res.json({ code: 403, msg: '新增菜单错误' })
+          } else {
+              res.json({ code: 200, msg: '新增菜单成功' })
+          }
+      })
+  }
+  ```
+
+  potionsModel
+
+  ```js
+  exports.addNavMenus = (obj, callback) => {
+      let sql = 'select value from options where id = 9';
+      conn.query(sql, (err, result) => {
+          if(err){
+              callback(err);
+          }else{
+              let old = JSON.parse(result[0].value);
+              old.push(obj);
+              let str = JSON.stringify(old);
+              console.log(str)
+              sql = 'update options set value=? where id = 9';
+              conn.query(sql, str, (err2) => {
+                  if(err2){
+                      callback(err2);
+                  }else{
+                      callback(null)
+                  }
+              })
+          }
+      })
+  }
+  ```
+
+- 前台
+
+####   删除
+
+
+
