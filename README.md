@@ -992,5 +992,114 @@ getRouterName(href) {
   })
   ```
 
+###15.网站设置
+
+- 显示
+
+  后台
+
+  router ( .get('/getAllOptions', optionsController.getAllOptions) )
+
+  optionsController
+
+  ```js
+  //网站设置的显示
+  exports.getAllOptions = (req, res) => {
+      optionsModel.getAllOptions((err, data) => {
+          if (err) {
+              res.json({ code: 403, msg: '获取数据错误' })
+          } else {
+              res.json({ code: 200, msg: '获取数据成功', data })
+          }
+      })
+  }
+  ```
+
+  optionsModel
+
+  ```js
+  //网站设置的显示
+  exports.getAllOptions = (callback) => {
+      let sql = 'select value from options where id < 9';
+      conn.query(sql, (err, result) => {
+          if(err){
+              callback(err);
+          }else{
+              callback(null, result);
+          }
+      })
+  }
+  ```
+
+  前台
+
+  html页面
+
+  ```html
+  <script type='text/template' id='settingsTemp'>
+    <div class="form-group">
+      <label for="site_logo" class="col-sm-2 control-label">网站图标</label>
+      <div class="col-sm-6">
+        <input id="site_logo" name="site_logo" type="hidden" value="{{data[1].value}}">
+        <label class="form-image">
+          <input id="logo" type="file">
+          <img src="{{data[1].value}}" style='background:rgba(0,0,0,.3)'>
+          <i class="mask fa fa-upload"></i>
+        </label>
+      </div>
+    </div>
+    <div class="form-group">
+      <label for="site_name" class="col-sm-2 control-label">站点名称</label>
+      <div class="col-sm-6">
+        <input id="site_name" name="site_name" class="form-control" type="type" placeholder="站点名称"  value="{{data[2].value}}">
+      </div>
+    </div>
+    <div class="form-group">
+      <label for="site_description" class="col-sm-2 control-label">站点描述</label>
+      <div class="col-sm-6">
+        <textarea id="site_description" name="site_description" class="form-control" placeholder="站点描述" cols="30" rows="6">{{data[3].value}}</textarea>
+      </div>
+    </div>
+    <div class="form-group">
+      <label for="site_keywords" class="col-sm-2 control-label">站点关键词</label>
+      <div class="col-sm-6">
+        <input id="site_keywords" name="site_keywords" class="form-control" type="type" placeholder="站点关键词" value="{{data[4].value}}">
+      </div>
+    </div>
+    <div class="form-group">
+      <label class="col-sm-2 control-label">评论</label>
+      <div class="col-sm-6">
+        <div class="checkbox">
+          <label><input id="comment_status" name="comment_status" type="checkbox" {{data[6].value == 1 ? 'checked' : ''}} >开启评论功能</label>
+        </div>
+        <div class="checkbox">
+          <label><input id="comment_reviewed" name="comment_reviewed" type="checkbox" {{data[7].value == 1 ? 'checked' : ''}} >评论必须经人工批准</label>
+        </div>
+      </div>
+    </div>
+    <div class="form-group">
+      <div class="col-sm-offset-2 col-sm-6">
+        <button type="submit" class="btn btn-primary">保存设置</button>
+      </div>
+    </div>
+  </script>
+  ```
+
+  settings.js
+
+  ```js
+  //显示
+  $.ajax({
+      url: '/getAllOptions',
+      dataType: 'json',
+      success: function(res){
+          if(res.code === 200){
+              $('form').html(template('settingsTemp', res))
+          }
+      }
+  })
+  ```
+
   
 
+- 修改

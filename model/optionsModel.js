@@ -60,3 +60,14 @@ exports.delNavMenu = (obj, callback) => {
         }
     })
 }
+//网站设置的显示
+exports.getAllOptions = (callback) => {
+    let sql = 'select value from options where id < 9';
+    conn.query(sql, (err, result) => {
+        if(err){
+            callback(err);
+        }else{
+            callback(null, result);
+        }
+    })
+}

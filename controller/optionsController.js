@@ -36,3 +36,13 @@ exports.delNavMenu = (req, res) => {
         }
     })
 }
+//网站设置的显示
+exports.getAllOptions = (req, res) => {
+    optionsModel.getAllOptions((err, data) => {
+        if (err) {
+            res.json({ code: 403, msg: '获取数据错误' })
+        } else {
+            res.json({ code: 200, msg: '获取数据成功', data })
+        }
+    })
+}
