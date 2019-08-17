@@ -46,3 +46,16 @@ exports.getAllOptions = (req, res) => {
         }
     })
 }
+//网站设置的修改
+exports.updateOptions = (req, res) => {
+    let obj = req.body;
+    obj.comment_status = obj.comment_status === 'on' ? '1' : '0';
+    obj.comment_reviewed = obj.comment_reviewed === 'on' ? '1' : '0';
+    optionsModel.updateOptions(obj, (err) => {
+        if (err) {
+            res.json({ code: 403, msg: '修改数据错误' })
+        } else {
+            res.json({ code: 200, msg: '修改数据成功' })
+        }
+    })
+}

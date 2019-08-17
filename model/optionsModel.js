@@ -71,3 +71,20 @@ exports.getAllOptions = (callback) => {
         }
     })
 }
+//网站设置的显示
+exports.updateOptions = (obj, callback) => {
+    let cnt = 0;
+    for( key in obj){
+        let sql = 'update `options` set value = ? where `key` = ?';
+        conn.query(sql, [obj[key], key], (err, result) => {
+            if(err){
+                callback(err);
+            }else{
+                cnt++;
+                if(cnt == 6){
+                    callback(null);
+                }
+            }
+        })
+    }
+}

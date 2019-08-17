@@ -762,7 +762,6 @@ getRouterName(href) {
     })
     ```
 
-
 ###12.加载提示及单条删除的正确显示
 
 - post.js
@@ -1103,3 +1102,51 @@ getRouterName(href) {
   
 
 - 修改
+
+  后台
+
+  router ( .post('/updateOptions', optionsController.updateOptions) )
+
+  optionsController
+
+  ```js
+  //网站设置的修改
+  exports.updateOptions = (req, res) => {
+      let obj = req.body;
+      //由于数据传过来的是on,所以需要处理
+      obj.comment_status = obj.comment_status === 'on' ? '1' : '0';
+      obj.comment_reviewed = obj.comment_reviewed === 'on' ? '1' : '0';
+      optionsModel.updateOptions(obj, (err) => {
+          if (err) {
+              res.json({ code: 403, msg: '修改数据错误' })
+          } else {
+              res.json({ code: 200, msg: '修改数据成功' })
+          }
+      })
+  }
+  ```
+
+  optionsModel
+
+  ```js
+  //网站设置的显示
+  exports.updateOptions = (obj, callback) => {
+      let cnt = 0;
+      for( key in obj){
+          let sql = 'update `options` set value = ? where `key` = ?';
+          conn.query(sql, [obj[key], key], (err, result) => {
+              if(err){
+                  callback(err);
+              }else{
+                  cnt++;
+                  if(cnt == 6){
+                      callback(null);
+                  }
+              }
+          })
+      }
+  }
+  ```
+
+  前台
+

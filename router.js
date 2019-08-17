@@ -45,6 +45,7 @@ router.get('/', pagesController.getIndexPage)
     .post('/addNavMenus', optionsController.addNavMenus)
     .get('/delNavMenu', optionsController.delNavMenu)
     .get('/getAllOptions', optionsController.getAllOptions)
+    .post('/updateOptions', optionsController.updateOptions)
 
     .post('/uploadFile', uploadController.uploadFile)
 //暴露
