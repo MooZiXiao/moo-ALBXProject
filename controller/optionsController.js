@@ -14,12 +14,25 @@ exports.getNavMenus = (req, res) => {
 exports.addNavMenus = (req, res) => {
     let obj = req.body;
     obj.icon = 'fa fa-glass';
-    console.log(obj)
+    // console.log(obj)
     optionsModel.addNavMenus(obj, (err) => {
         if (err) {
             res.json({ code: 403, msg: '新增菜单错误' })
         } else {
             res.json({ code: 200, msg: '新增菜单成功' })
+        }
+    })
+}
+//删除菜单 
+exports.delNavMenu = (req, res) => {
+    let obj = req.query.data;
+    //设置为存入数组中
+    obj = obj instanceof Array ? obj : [obj];
+    optionsModel.delNavMenu (obj, (err) => {
+        if (err) {
+            res.json({ code: 403, msg: '删除菜单错误' })
+        } else {
+            res.json({ code: 200, msg: '删除菜单成功' })
         }
     })
 }

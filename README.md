@@ -871,5 +871,126 @@ getRouterName(href) {
 
 ####   删除
 
+- 后台
 
+  - router
+
+    ```js
+    .get('/delNavMenu', optionsController.delNavMenu)
+    ```
+
+  - controller
+
+    ```js
+    //删除菜单 
+    exports.delNavMenu = (req, res) => {
+        let obj = req.query.data;
+        //设置为存入数组中
+        obj = obj instanceof Array ? obj : [obj];
+        optionsModel.delNavMenu (obj, (err) => {
+            if (err) {
+                res.json({ code: 403, msg: '删除菜单错误' })
+            } else {
+                res.json({ code: 200, msg: '删除菜单成功' })
+            }
+        })
+    }
+    ```
+
+    
+
+  - model
+
+    ```js
+    //删除菜单(含批量删除)
+    exports.delNavMenu = (obj, callback) => {
+        let sql = 'select value from options where id = 9';
+        conn.query(sql, (err, result) => {
+            if(err){
+                callback(err)
+            }else{
+                let arr = JSON.parse(result[0].value);
+                let index = [];
+                for(let i = 0; i < obj.length; i++){
+                    index.push( 
+                        arr.findIndex(e => {
+                            e = JSON.stringify(e)
+                            return e.indexOf(JSON.stringify(obj[i])) !== -1
+                        })
+                    )
+                    //删除对应数组中的项
+                    arr.splice(index[i], 1);
+                }
+                let str = JSON.stringify(arr);
+                sql = 'update options set value = ? where id = 9';
+                conn.query(sql, str, (err2) => {
+                    if(err2){
+                        callback(err2)
+                    }else{
+                        callback(null)
+                    }
+                })
+            }
+        })
+    }
+    ```
+
+- 前台
+
+  单条删除
+
+  ```js
+  //删除
+  $('tbody').on('click', '.btnDel', function(){
+      let title = $(this).data('title');
+      // console.log(data)
+      if(confirm('确定要删除吗')){
+          $.ajax({
+              url: '/delNavMenu',
+              data: {data: title},
+              dataType: 'json',
+              success: function(res){
+                  if(res.code === 200){
+                      init()
+                  }else{
+                      $('.alert-danger span').text(res.msg);
+                      $('.alert-danger').fadeIn(500).delay(2000).fadeOut(500);
+                  }
+              }
+          })
+      }
+  })
+  ```
+
+  批量删除
+
+  ```js
+  //批量删除
+  $('.btnDels').on('click', function(){
+      let ckMore = $('tbody').find('.ck:checked');
+      // console.log(ckMore)
+      let arr = [];
+      for(let i = 0; i < ckMore.length; i++){
+          arr.push($(ckMore[i]).data('title'))
+      }
+      console.log(arr)
+      if(confirm('确定要删除吗')){
+          $.ajax({
+              url: '/delNavMenu',
+              data: {data: arr},
+              dataType: 'json',
+              success: function(res){
+                  if(res.code === 200){
+                      init()
+                  }else{
+                      $('.alert-danger span').text(res.msg);
+                      $('.alert-danger').fadeIn(500).delay(2000).fadeOut(500);
+                  }
+              }
+          })
+      }
+  })
+  ```
+
+  
 
