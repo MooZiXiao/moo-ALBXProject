@@ -60,6 +60,91 @@ exports.delNavMenu = (obj, callback) => {
         }
     })
 }
+//轮播显示
+exports.getSlides = (callback) => {
+    let sql = 'select value from options where id = 10';
+    conn.query(sql, (err, result) => {
+        if(err){
+            callback(err)
+        }else{
+            let data = JSON.parse(result[0].value);
+            callback(null, data);
+        }
+    })
+}
+//轮播添加
+exports.addSlides = (obj, callback) => {
+    let sql = 'select value from options where id = 10';
+    conn.query(sql, (err, result) => {
+        if(err){
+            callback(err)
+        }else{
+            let arr = JSON.parse(result[0].value);
+            arr.push(obj);
+            let str = JSON.stringify(arr);
+            sql = 'update options set value = ? where id = 10';
+            conn.query(sql, str, (err2, res2) => {
+                if(err2){
+                    callback(err2);
+                }else{
+                    callback(null)
+                }
+            })
+        }
+    })
+}
+//删除轮播
+exports.delSlides = (obj, callback) => {
+    let sql = 'select value from options where id = 10';
+    conn.query(sql, (err, result) => {
+        if(err){
+            callback(err)
+        }else{
+            let arr = JSON.parse(result[0].value);
+            let index = [];
+            for(let i = 0; i < obj.length; i++){
+                index.push(arr.findIndex(e => {
+                    return JSON.stringify(e) == JSON.stringify(obj[i])
+                }))
+                arr.splice(index[i], 1);
+            }
+            let str = JSON.stringify(arr);
+            sql = 'update options set value = ? where id = 10';
+            conn.query(sql, str, (err2, res2) => {
+                if(err2){
+                    callback(err2);
+                }else{
+                    callback(null)
+                }
+            })
+        }
+    })
+}
+// exports.delSlides = (obj, callback) => {
+//     let sql = 'select value from options where id = 10';
+//     conn.query(sql, (err, result) => {
+//         if(err){
+//             callback(err)
+//         }else{
+//             let arr = JSON.parse(result[0].value);
+//             console.log(arr)
+//             let index = arr.findIndex(e => {
+//                 return e == obj
+//             })
+//             arr.splice(index, 1);
+//             console.log(arr)
+//             let str = JSON.stringify(arr);
+//             sql = 'update options set value = ? where id = 10';
+//             conn.query(sql, str, (err2, res2) => {
+//                 if(err2){
+//                     callback(err2);
+//                 }else{
+//                     callback(null)
+//                 }
+//             })
+//         }
+//     })
+// }
 //网站设置的显示
 exports.getAllOptions = (callback) => {
     let sql = 'select value from options where id < 9';
@@ -71,7 +156,7 @@ exports.getAllOptions = (callback) => {
         }
     })
 }
-//网站设置的显示
+//网站设置的修改
 exports.updateOptions = (obj, callback) => {
     let cnt = 0;
     for( key in obj){

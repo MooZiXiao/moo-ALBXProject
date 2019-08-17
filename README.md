@@ -1129,7 +1129,7 @@ getRouterName(href) {
   optionsModel
 
   ```js
-  //网站设置的显示
+  //网站设置的修改
   exports.updateOptions = (obj, callback) => {
       let cnt = 0;
       for( key in obj){
@@ -1150,3 +1150,6 @@ getRouterName(href) {
 
   前台
 
+### 16.图片轮播
+
+​		图片轮播思想同网站导航菜单,略

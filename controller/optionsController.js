@@ -36,6 +36,41 @@ exports.delNavMenu = (req, res) => {
         }
     })
 }
+//轮播显示 
+exports.getSlides = (req, res) => {
+    optionsModel.getSlides((err, data) => {
+        if (err) {
+            res.json({ code: 403, msg: '获得数据错误' })
+        } else {
+            res.json({ code: 200, msg: '获得数据成功', data })
+        }
+    })
+}
+//轮播添加
+exports.addSlides = (req, res) => {
+    let obj = req.body;
+    obj.image = '/uploads/' + obj.image;
+    optionsModel.addSlides(obj, (err) => {
+        if (err) {
+            res.json({ code: 403, msg: '添加数据错误' })
+        } else {
+            res.json({ code: 200, msg: '添加数据成功' })
+        }
+    })
+}
+//轮播删除
+exports.delSlides = (req, res) => {
+    let obj = req.query.data;
+    obj = obj instanceof Array ? obj : [obj];
+    optionsModel.delSlides(obj, (err) => {
+        if (err) {
+            res.json({ code: 403, msg: '删除数据错误' })
+        } else {
+            res.json({ code: 200, msg: '删除数据成功' })
+        }
+    })
+}
+
 //网站设置的显示
 exports.getAllOptions = (req, res) => {
     optionsModel.getAllOptions((err, data) => {
