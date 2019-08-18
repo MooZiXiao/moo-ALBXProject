@@ -50,6 +50,12 @@ router.get('/', pagesController.getIndexPage)
     .post('/addSlides', optionsController.addSlides)
     .get('/delSlides', optionsController.delSlides)
 
+    .get('/getAllUsers', userController.getAllUsers)
+    .get('/getUserEmail', userController.getUserEmail)
+    .post('/addUser', userController.addUser)
+    .post('/editUser', userController.editUser)
+    .get('/delUserById', userController.delUserById)
+
     .post('/uploadFile', uploadController.uploadFile)
 //暴露
 module.exports = router;
