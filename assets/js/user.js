@@ -30,6 +30,7 @@ $(function(){
             msg: '密码不能为空'
         }
     ])   
+    let emailErrMsg = '';
     //判断邮箱是否存在 
     $('#email').on('blur', function(){
         $.ajax({
@@ -38,6 +39,21 @@ $(function(){
                 if(res.code !== 200){
                     $('.alert-danger span').text(res.msg);
                     $('.alert-danger').fadeIn(500).delay(2000).fadeOut(500);
+                    emailErrMsg = res.msg;
+                }
+            }
+        })
+    })
+    let slugErrMsg = '';
+    //验证别名
+    $('#slug').on('blur', function(){
+        $.ajax({
+            url: '/getUserSlug?slug=' + $('#slug').val(),
+            success: function(res){
+                if(res.code !== 200){
+                    $('.alert-danger span').text(res.msg);
+                    $('.alert-danger').fadeIn(500).delay(2000).fadeOut(500);
+                    slugErrMsg = res.msg;
                 }
             }
         })
@@ -64,30 +80,37 @@ $(function(){
     })
     function opt(url){
         let errMsg = regx.start();
-        if(errMsg){
-            $('.alert-danger span').text(errMsg);
+        if(emailErrMsg){
+            $('.alert-danger span').text(emailErrMsg);
             $('.alert-danger').fadeIn(500).delay(2000).fadeOut(500);
-        }
-        else{
-            $.ajax({
-                type:'post',
-                url: url,
-                data: $('form').serialize(),
-                success: function(res){
-                    if(res.code === 200){
-                        init()
-                    }else{
-                        $('.alert-danger span').text(res.msg);
-                        $('.alert-danger').fadeIn(500).delay(2000).fadeOut(500);
+        }else if(slugErrMsg) {
+            $('.alert-danger span').text(slugErrMsg);
+            $('.alert-danger').fadeIn(500).delay(2000).fadeOut(500);
+        }else{
+            if(errMsg){
+                $('.alert-danger span').text(errMsg);
+                $('.alert-danger').fadeIn(500).delay(2000).fadeOut(500);
+            }
+            else{
+                $.ajax({
+                    type:'post',
+                    url: url,
+                    data: $('form').serialize(),
+                    success: function(res){
+                        if(res.code === 200){
+                            init()
+                        }else{
+                            $('.alert-danger span').text(res.msg);
+                            $('.alert-danger').fadeIn(500).delay(2000).fadeOut(500);
+                        }
                     }
-                }
-            })
+                })
+            }
         }
     }
     //删除
     $('tbody').on('click', '.btndel', function(){
         let id = $(this).data('id');
-        console.log(id)
         delOpt(id)
     })
     //全选
@@ -118,9 +141,7 @@ $(function(){
         for(let i = 0; i < isck.length; i++){
             data.push($(isck[i]).data('id'))
         }
-        console.log(data)
         let id = data.join(',');
-        console.log(id)
         delOpt(id)
     })
     function delOpt(id){

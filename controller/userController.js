@@ -74,7 +74,6 @@ exports.editUser = (req, res) => {
 //删除用户
 exports.delUserById = (req, res) => {
     let id = req.query.data;
-    console.log(id)
     userModel.delUserById(id, (err) => {
         if(err){
             res.json({code: 403, msg: '删除数据失败'});
@@ -82,4 +81,84 @@ exports.delUserById = (req, res) => {
             res.json({code: 200, msg: '删除数据成功'});
         }
     })
+}
+//用户别名
+exports.getUserSlug = (req, res) => {
+    let slug = req.query.slug
+    userModel.getUserSlug(slug, (err, data) => {
+        if(err){
+            res.json({code: 403, msg: '获得数据错误'});
+        }else{
+            if(data){
+                res.json({code: 403, msg: '用户别名已存在'});
+            }else{
+                res.json({code: 200, msg: '用户别名可以使用'});
+            }
+        }
+    })
+}
+//根据登录的email也是可以的
+//获得当前用户
+exports.getCurrentUserByEmail = (req, res) => {
+    let email = req.session.currentUser.email
+    userModel.login(email, (err, data) => {
+        if(err){
+            res.json({code: 403, msg: '获得数据错误'});
+        }else{
+            res.json({code: 200, msg: '获得数据成功', data});
+        }
+    })
+}
+//当前用户别名
+exports.getCurrentUserSlug = (req, res) => {
+    let slug = req.query.slug
+    let oldSlug = req.session.currentUser.slug
+    userModel.getUserSlug(slug, (err, data) => {
+        if(err){
+            res.json({code: 403, msg: '获得数据错误'});
+        }else{
+            if(data){
+                if(data.slug == oldSlug){
+                    res.json({code: 200, msg: '用户别名没有修改，与上次一致'});
+                }else{
+                    res.json({code: 403, msg: '用户别名已存在'});
+                }
+            }else{
+                res.json({code: 200, msg: '用户别名可以使用'});
+            }
+        }
+    })
+}
+//编辑当前用户信息
+exports.editCurrentUserByEmail = (req, res) => {
+    let obj = req.body;
+    obj.email = req.session.currentUser.email;
+    userModel.editUser(obj, (err) => {
+        if(err){
+            res.json({code: 403, msg: '修改数据错误'});
+        }else{
+            res.json({code: 200, msg: '修改数据成功'});
+        }
+    })
+}
+//获得当前用户的密码
+exports.getCurrentUserPwd = (req, res) => {
+    let password = req.query.password;
+    let email = req.session.currentUser.email
+    userModel.login(email, (err, data) => {
+        if(err){
+            res.json({code: 403, msg: '获得数据错误'});
+        }else{
+            if(data.password === password){
+                res.json({code: 200, msg: '旧密码正确'});
+            }else{
+                res.json({code: 403, msg: '旧密码不正确'});
+            }
+        }
+    })
+}
+//退出
+exports.exit = (req, res) => {
+    req.session.destroy();
+    res.redirect('/admin/login')
 }

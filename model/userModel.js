@@ -55,3 +55,14 @@ exports.delUserById = (id, callback) => {
         }
     })
 }
+//用户别名
+exports.getUserSlug = (slug, callback) => {
+    let sql = 'select * from users where slug = ?';
+    conn.query(sql, slug, (err, result) => {
+        if(err){
+            callback(err)
+        }else{
+            callback(null, result[0])
+        }
+    })
+}

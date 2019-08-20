@@ -52,9 +52,17 @@ router.get('/', pagesController.getIndexPage)
 
     .get('/getAllUsers', userController.getAllUsers)
     .get('/getUserEmail', userController.getUserEmail)
+    .get('/getUserSlug', userController.getUserSlug)
     .post('/addUser', userController.addUser)
     .post('/editUser', userController.editUser)
     .get('/delUserById', userController.delUserById)
+
+    .get('/getCurrentUserByEmail', userController.getCurrentUserByEmail)
+    .get('/getCurrentUserSlug', userController.getCurrentUserSlug)
+    .post('/editCurrentUserByEmail', userController.editCurrentUserByEmail)
+    .get('/getCurrentUserPwd', userController.getCurrentUserPwd)
+    //注销（退出），即销毁session
+    .get('/exit', userController.exit)
 
     .post('/uploadFile', uploadController.uploadFile)
 //暴露

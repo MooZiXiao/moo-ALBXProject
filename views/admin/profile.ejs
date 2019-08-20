@@ -6,14 +6,15 @@
         <h1>我的个人资料</h1>
       </div>
       <!-- 有错误信息时展示 -->
-      <!-- <div class="alert alert-danger">
-        <strong>错误！</strong>发生XXX错误
-      </div> -->
+      <div class="alert alert-danger" hidden>
+        <strong>错误！</strong><span>发生XXX错误</span>
+      </div>
       <form class="form-horizontal">
         <div class="form-group">
           <label class="col-sm-3 control-label">头像</label>
           <div class="col-sm-6">
             <label class="form-image">
+              <input id="imgHide" type="hidden" name='avatar'>
               <input id="avatar" type="file">
               <img src="../assets/img/default.png">
               <i class="mask fa fa-upload"></i>
@@ -44,13 +45,13 @@
         <div class="form-group">
           <label for="bio" class="col-sm-3 control-label">简介</label>
           <div class="col-sm-6">
-            <textarea id="bio" class="form-control" placeholder="Bio" cols="30" rows="6">MAKE IT BETTER!</textarea>
+            <textarea id="bio" name='bio' class="form-control" placeholder="Bio" cols="30" rows="6">MAKE IT BETTER!</textarea>
           </div>
         </div>
         <div class="form-group">
           <div class="col-sm-offset-3 col-sm-6">
-            <button type="submit" class="btn btn-primary">更新</button>
-            <a class="btn btn-link" href="password-reset.html">修改密码</a>
+            <input type="button" class="btn btn-primary btnSave" value='更新'>
+            <a class="btn btn-link" href="/admin/password-reset">修改密码</a>
           </div>
         </div>
       </form>
@@ -58,3 +59,4 @@
   </div>
   <%-include('./layouts/admin-aside.ejs')%>
 <%-include('./layouts/admin-footer.ejs')%>
+<script src='/assets/js/profile.js'></script>

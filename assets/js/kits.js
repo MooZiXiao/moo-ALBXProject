@@ -18,6 +18,11 @@ let regxMethods = {
             return msg;
         }
     },
+    minLength(val, len, msg){
+        if(val.length < len){
+            return msg
+        }
+    },
     isNoReal(val1, val2, msg) {
         if (val1 !== val2) {
             return msg;

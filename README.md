@@ -1156,3 +1156,474 @@ getRouterName(href) {
 
 ### 17.用户（全部）- 显示、编辑、添加、删除（批量删除）
 
+### 18.当前用户信息
+
+因为 **email** 在数据库中的设置是不能重复的
+
+由于用户登录的时候，通过  **req.session.currentUser**  将用户信息存储起来，所以在后台的设置中，则可以通过条件 **email** 来处理当前用户的数据显示、编辑
+
+- ####当前用户信息的显示
+
+  - 后台
+
+    - router
+
+      ```js
+      .get('/getCurrentUserByEmail', userController.getCurrentUserByEmail)
+      ```
+
+    - userController
+
+      由于在登录的时候，就已经写好了的，通过邮箱来查询  **users** 表中的数据（数据模型中的 **login** 方法），所以只需调用即可
+
+      ```js
+      exports.getCurrentUserByEmail = (req, res) => {
+          let email = req.session.currentUser.email
+          userModel.login(email, (err, data) => {
+              if(err){
+                  res.json({code: 403, msg: '获得数据错误'});
+              }else{
+                  res.json({code: 200, msg: '获得数据成功', data});
+              }
+          })
+      }
+      ```
+
+    - userModel
+
+  - 前台
+
+    - profile.html
+
+      由于考虑到后边编辑时的数据收集，所以在页面中加入图片的隐藏域
+
+      ```html
+      <input id="imgHide" type="hidden" name='avatar'>
+      ```
+
+    - profile.js
+
+      ```js
+      function init(){
+          $.ajax({
+              url: '/getCurrentUserByEmail',
+              success: function(res){
+                  if(res.code === 200){
+                      $('.form-image img').attr('src', res.data.avatar);
+                      $('#email').val(res.data.email);
+                      $('#slug').val(res.data.slug);
+                      $('#nickname').val(res.data.nickname);
+                      $('#bio').val(res.data.bio);
+                      $('#imgHide').val(res.data.avatar);
+                  }
+              }
+          })
+      }
+      init()
+      ```
+
+- ####当前用户的编辑
+
+  由于在用户编辑的过程中，需要考虑用户修改的用户的是否存在，所以在编辑前做一些验证
+
+  - #####用户别名的验证
+
+    - 后台
+
+      - router
+
+        ```js
+        .get('/getCurrentUserSlug', userController.getCurrentUserSlug)
+        ```
+
+      - userController
+
+        ```js
+        exports.getCurrentUserSlug = (req, res) => {
+            let slug = req.query.slug
+            let oldSlug = req.session.currentUser.slug
+            userModel.getUserSlug(slug, (err, data) => {
+                if(err){
+                    res.json({code: 403, msg: '获得数据错误'});
+                }else{
+                    if(data){
+                        if(data.slug == oldSlug){
+                            res.json({code: 200, msg: '用户别名没有修改，与上次一致'});
+                        }else{
+                            res.json({code: 403, msg: '用户别名已存在'});
+                        }
+                    }else{
+                        res.json({code: 200, msg: '用户别名可以使用'});
+                    }
+                }
+            })
+        }
+        ```
+
+      - userMedol
+
+        ```js
+        //存储别名错误的信息提示（编辑的时候可用）
+        let slugErrMsg = '';
+        //用户别名
+        exports.getUserSlug = (slug, callback) => {
+            let sql = 'select * from users where slug = ?';
+            conn.query(sql, slug, (err, result) => {
+                if(err){
+                    callback(err)
+                }else{
+                    callback(null, result[0])
+                }
+            })
+        }
+        ```
+
+    - 前台
+
+      ```js
+      //验证别名
+      $('#slug').on('blur', function(){
+          $.ajax({
+              url: '/getCurrentUserSlug?slug=' + $('#slug').val(),
+              success: function(res){
+                  if(res.code !== 200){
+                      $('.alert-danger span').text(res.msg);
+                      $('.alert-danger').fadeIn(500).delay(2000).fadeOut(500);
+                      slugErrMsg = res.msg
+                  }
+              }
+          })
+      })
+      ```
+
+- ####当前用户编辑
+
+  - 后台
+
+    - router
+
+      ```js
+      .post('/editCurrentUserByEmail', userController.editCurrentUserByEmail)
+      ```
+
+    - userController
+
+      ```js
+      //编辑当前用户信息
+      exports.editCurrentUserByEmail = (req, res) => {
+          let obj = req.body;
+          userModel.editUser(obj, (err) => {
+              if(err){
+                  res.json({code: 403, msg: '修改数据错误'});
+              }else{
+                  res.json({code: 200, msg: '修改数据成功'});
+              }
+          })
+      }
+      ```
+
+      
+
+    - userModel
+
+      由于之前已经写好了，所以直接调用数据层的 **editUser** 方法，共用
+
+      ```js
+      //编辑用户
+      exports.editUser = (obj, callback) => {
+          let sql = 'update users set ? where email= ? ';
+          conn.query(sql, [obj, obj.email], (err, result) => {
+              if(err){
+                  callback(err)
+              }else{
+                  callback(null)
+              }
+          })
+      }
+      ```
+
+  - 前台 profile.js
+
+    ```js
+    //交互验证
+    let nickname = document.getElementById('nickname')
+    let regx = new regxFun();
+    regx.add(nickname, [
+        {
+            funName: 'isEmpty',
+            msg: '昵称不能为空'
+        },{
+            funName: 'minLength:2',
+            msg: '昵称不能少于2位'
+        }
+    ])
+    //修改
+    $('.btnSave').on('click', function(){
+        //验证
+        let errMsg = regx.start();
+        if(slugErrMsg){
+            $('.alert-danger span').text(slugErrMsg);
+            $('.alert-danger').fadeIn(500).delay(2000).fadeOut(500);
+        }else{
+            if(errMsg){
+                $('.alert-danger span').text(errMsg);
+                $('.alert-danger').fadeIn(500).delay(2000).fadeOut(500);
+            }else{
+                $.ajax({
+                    type: 'post',
+                    url: '/editCurrentUserByEmail',
+                    data: $('form').serialize(),
+                    success: function(res){
+                        if(res.code === 200){
+                            init()
+                        }else{
+                            $('.alert-danger span').text(res.msg);
+                            $('.alert-danger').fadeIn(500).delay(2000).fadeOut(500);
+                        }
+                    }
+                })
+            }
+        }
+    })
+    ```
+
+- #### 密码修改
+
+  - #####旧密码验证
+
+    - 后台
+
+      - router
+
+        ```js
+        .get('/getCurrentUserPwd', userController.getCurrentUserPwd)
+        ```
+
+      - userController
+
+        ```js
+        exports.getCurrentUserPwd = (req, res) => {
+            let password = req.query.password;
+            let email = req.session.currentUser.email
+            userModel.login(email, (err, data) => {
+                if(err){
+                    res.json({code: 403, msg: '获得数据错误'});
+                }else{
+                    if(data.password === password){
+                        res.json({code: 200, msg: '旧密码正确'});
+                    }else{
+                        res.json({code: 403, msg: '旧密码不正确'});
+                    }
+                }
+            })
+        }
+        ```
+
+      - userModel
+
+    - 前台
+
+      ```js
+      //存储错误提示
+      let errMsg = ''
+      let old = document.getElementById('old')
+      let password = document.getElementById('password');
+      let confirm = document.getElementById('confirm');
+      
+      $(old).focus()
+      let regx = new regxFun();
+      regx.add(old, [
+          {
+              funName: 'isEmpty',
+              msg: '旧密码不能为空'
+          }, {
+              funName: 'minLength:3',
+              msg: '旧密码不能少于3位'
+          }
+      ])
+      
+      //判断旧密码是否一致
+      $('#old').on('change', function () {
+          let errMsg = regx.start()
+          if (errMsg) {
+              $('.alert-danger span').text(errMsg);
+              $('.alert-danger').fadeIn(500).delay(2000).fadeOut(500);
+              $(old).focus()
+          } else {
+              $.ajax({
+                  url: '/getCurrentUserPwd?password=' + $('#old').val(),
+                  success: function (res) {
+                      if (res.code !== 200) {
+                          $('.alert-danger span').text(res.msg);
+                          $('.alert-danger').fadeIn(500).delay(2000).fadeOut(500);
+                          $(old).focus()
+                      }
+                  }
+              })
+          }
+      })
+      ```
+
+  - #####密码是否为空及长度验证
+
+    ```js
+    $(password).on('change', function () {
+        regx.add(password, [
+            {
+                funName: 'isEmpty',
+                msg: '新密码不能为空'
+            }, {
+                funName: 'minLength:3',
+                msg: '新密码不能少于3位'
+            }
+        ])
+        errMsg = regx.start()
+        if (errMsg) {
+            $('.alert-danger span').text(errMsg);
+            $('.alert-danger').fadeIn(500).delay(2000).fadeOut(500);
+            if (errMsg.indexOf('少于3位') || errMsg.indexOf('空')) {
+                $(password).focus()
+            }
+        }else{
+            //用户密码不一致，回到新密码的修改，验证
+            if ($(confirm).val()) {
+                if($(confirm).val() !== $(password).val()){
+                    errMsg = '两次密码不一致，请重新确认'
+                    $('.alert-danger span').text(errMsg);
+                    $('.alert-danger').fadeIn(500).delay(2000).fadeOut(500);
+                }
+            }
+        }
+    })
+    ```
+
+    
+
+  - #####确认密码的验证
+
+    ```js
+    //判断两次密码是否一致
+    $(confirm).on('change', function () {
+        regx.add(confirm, [
+            {
+                funName: 'isEmpty',
+                msg: '确认新密码不能为空'
+            }, {
+                funName: 'minLength:3',
+                msg: '确认新密码不能少于3位'
+            }
+        ])
+        errMsg = regx.start()
+        if (errMsg) {
+            $('.alert-danger span').text(errMsg);
+            $('.alert-danger').fadeIn(500).delay(2000).fadeOut(500);
+            if (errMsg.indexOf('少于3位') || errMsg.indexOf('空')) {
+                $(confirm).focus()
+            }
+        }else{
+            if($(confirm).val() !== $(password).val()){
+                errMsg = '两次密码不一致，请重新确认'
+                $('.alert-danger span').text(errMsg);
+                $('.alert-danger').fadeIn(500).delay(2000).fadeOut(500);
+            }
+        }
+    })
+    ```
+
+  - #####修改
+
+    - 后台
+
+      - router
+
+        ```js
+        //之前配置修改当前用户的时候就已经配置好了，所以调用使用即可
+        .post('/editCurrentUserByEmail', userController.editCurrentUserByEmail)
+        ```
+
+      - userController
+
+        由于 之前已经写好了编辑的接口，所以只需要通过 **ression** 加入 **email** 即可
+
+        ```js
+        exports.editCurrentUserByEmail = (req, res) => {
+            let obj = req.body;
+            //加入email即可
+            obj.email = req.session.currentUser.email;
+            userModel.editUser(obj, (err) => {
+                if(err){
+                    res.json({code: 403, msg: '修改数据错误'});
+                }else{
+                    res.json({code: 200, msg: '修改数据成功'});
+                }
+            })
+        }
+        ```
+
+      - userModel（同之前的**editUser**一致，不需要重写）
+
+    - 前台
+
+      ```js
+      $('.btnEidt').on('click', function () {
+          if (errMsg) {
+              $('.alert-danger span').text(errMsg);
+              $('.alert-danger').fadeIn(500).delay(2000).fadeOut(500);
+          } else {
+              $.ajax({
+                  type: 'post',
+                  url: '/editCurrentUserByEmail',
+                  data: { password: $(confirm).val() },
+                  success: function (res) {
+                      if (res.code === 200) {
+                          //需要调用销毁session接口
+                          $.ajax({
+                              url: '/exit',
+                              success: function(res){
+                                  //回登录页
+                                  location.href = '/admin/login'
+                              }
+                          })
+                      } else {
+                          $('.alert-danger span').text(res.msg);
+                          $('.alert-danger').fadeIn(500).delay(2000).fadeOut(500);
+                      }
+                  }
+              })
+          }
+      })
+      ```
+
+  - #####退出（销毁session）
+
+    - 后台
+
+      - router
+
+        ```js
+        .get('/exit', userController.exit)
+        ```
+
+      - userController
+
+        ```js
+        exports.exit = (req, res) => {
+            req.session.destroy();
+            res.redirect('/admin/login')
+        }
+        ```
+
+    - 前台
+
+      ```js
+      $.ajax({
+          url: '/exit',
+          success: function(res){
+              //回登录页
+              location.href = '/admin/login'
+          }
+      })
+      ```
+
+      
+
