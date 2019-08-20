@@ -5,12 +5,14 @@ const userController = require('./controller/userController');
 const postsController = require('./controller/postsController');
 const cateController = require('./controller/cateController');
 const optionsController = require('./controller/optionsController');
+const commentsController = require('./controller/commentsController');
 const uploadController = require('./controller/uploadController');
 //路由
 const router = express.Router();
 
 //前台
-router.get('/', pagesController.getIndexPage)
+router
+    .get('/', pagesController.getIndexPage)
     .get('/detail', pagesController.getDetailPage)
     .get('/list', pagesController.getListPage)
     //后台
@@ -63,6 +65,11 @@ router.get('/', pagesController.getIndexPage)
     .get('/getCurrentUserPwd', userController.getCurrentUserPwd)
     //注销（退出），即销毁session
     .get('/exit', userController.exit)
+
+    .get('/getAllComments', commentsController.getAllComments)
+    .get('/editComStatusAgreeById', commentsController.editComStatusAgreeById)
+    .get('/editComStatusRefuceById', commentsController.editComStatusRefuceById)
+    .get('/delCommentsStatusById', commentsController.delCommentsStatusById)
 
     .post('/uploadFile', uploadController.uploadFile)
 //暴露
